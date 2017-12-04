@@ -8,6 +8,10 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+use App\Orders;
+use App\Products;
+use Illuminate\Support\Facades\DB;
 
 class SyncOrderJob implements ShouldQueue
 {
@@ -17,7 +21,8 @@ class SyncOrderJob implements ShouldQueue
 
     /**
      * Create a new job instance.
-    git init*
+     * git init*
+     *
      * @return void
      */
     public function __construct(array $task)
@@ -37,17 +42,20 @@ class SyncOrderJob implements ShouldQueue
         $url           = $this->task['url'];
         $id            = $this->task['id'];
         $order_id      = $this->task['order_id'];
+        $location      = $this->task['location'];
         $authorization = $this->task['authorization'];
+
         try {
             $res = $client->request(
                 "GET",
                 $url,
                 ['headers' => ['Authorization' => $authorization]]
             );
+
             if ($res->getStatusCode() == "200") {
 
-                $res       = $res->getBody()->getContents();
-                $track_arr = json_decode($res, true);
+                $contents  = $res->getBody()->getContents();
+                $track_arr = json_decode($contents, true);
 
                 if (isset($track_arr['order_information']) && isset($track_arr['tracking_information'])) {
 
@@ -66,6 +74,7 @@ class SyncOrderJob implements ShouldQueue
                     }
 
                     $track_info = $track_arr['tracking_information'];
+
                     $track_info = [
                         ['status_code' => 'UPL', 'status_date' => '2017-11-27T10:42:41.764027'],
                         ['status_code' => 'PKD', 'status_date' => '2017-11-27T10:42:41.764027'],
@@ -81,13 +90,15 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->delivery_order_created_at = $status_date;
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery order created at " . $status_date);
+                                //TODO  更新sku的当地库存
+                                $this->sync_inventory($id, $location, "UPL");
                             }
                             if ($status_code == "PKD" && $this->task['picked_status'] == 0) {
-                                $update_order                = Orders::find($id);
+                                $update_order = Orders::find($id);
+                                Log::info("order_id $order_id delivery order picked at " . $status_date);
                                 $update_order->picked_status = 1;
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery order picked at " . $status_date);
-                                //TODO  更新sku的当地库存
                             }
                             if ($status_code == "DLV") {
                                 $update_order                  = Orders::find($id);
@@ -102,6 +113,7 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery on hold at " . $status_date);
                                 //TODO  更新sku的当地库存
+                                $this->sync_inventory($id, $location, "HLD");
                             }
                         }
                     }
@@ -111,9 +123,54 @@ class SyncOrderJob implements ShouldQueue
             }
         } catch (\GuzzleHttp\Exception\RequestException $e) {
 
-            Log::info("url $url response " . $e->getResponse()->getBody()->getContents());
+            Log::info("url $url response " . $e->getResponse()->getBody()->getContents() . " Location: " . $location);
         }
 
+    }
+
+    // UPL 减库存  HLD加沙特库存
+    public function sync_inventory($id, $location, $type)
+    {
+        $order_full_info = @Orders::find($id)->get(['order_full_info'])[0]['order_full_info'];
+
+        $line_items = @json_decode($order_full_info, true)['line_items'];
+
+        if (count($line_items) > 0) {
+            foreach ($line_items as $item) {
+                $sku      = $item['sku'];
+                $quantity = $item['quantity'];
+
+                if ($type == "UPL") {
+                    if ($location == "guangzhou") {
+                        Products::where('sku', $sku)->update(
+                            ['shenzhen_inventory' => DB::raw('shenzhen_inventory-' . $quantity)]
+                        );
+                    }
+                    else {
+                        Products::where('sku', $sku)->update(
+                            ['saudi_inventory' => DB::raw('saudi_inventory-' . $quantity)]
+                        );
+                    }
+
+                    $message = sprintf("SKU %s in %s reduce %d", $sku, $location, $quantity);
+
+                    Log::info($message);
+
+                }
+
+                if ($type == "HLD") {
+                    Products::where('sku', $sku)->update(
+                        ['saudi_inventory' => DB::raw('saudi_inventory+' . $quantity)]
+                    );
+
+                    $message = sprintf("SKU %s in saudi add %d", $sku, $quantity);
+
+                    Log::info($message);
+
+                }
+
+            }
+        }
     }
 
     public function fulfillment_request($track_no, $order_id)

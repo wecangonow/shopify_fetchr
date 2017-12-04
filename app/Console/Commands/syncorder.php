@@ -59,12 +59,13 @@ class SyncOrder extends Command
 
             $job['id'] = $order->id;
             $job['name'] = $order->name;
+            $job['picked_status'] = $order->picked_status;
             $job['order_id'] = $order->order_id;
             $job['fulfillment_status'] = $order->fulfillment_status;
             $job['delivery_order_created_at'] = $order->delivery_order_created_at;
             $job['url'] = $url;
-            $job['location'] = "shenzhen";
-            $job['authorization'] = config('app.fetchr_authorization_shenzhen');
+            $job['location'] = "guangzhou";
+            $job['authorization'] = config('app.fetchr_authorization_guangzhou');
 
             dispatch(new SyncOrderJob($job));
             $job['location'] = 'saudi';

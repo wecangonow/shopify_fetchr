@@ -48,6 +48,7 @@ class ProductsController extends Controller
         });
     }
 
+
     /**
      * Create interface.
      *
@@ -74,10 +75,20 @@ class ProductsController extends Controller
         return Admin::grid(Products::class, function (Grid $grid) {
 
             $grid->id('ID')->sortable();
-            $grid->picture()->image();
-            $grid->sku("SKU");
-            $grid->shenzhen_inventory("深圳库存");
-            $grid->saudi_inventory("沙特库存");
+            $grid->picture()->image('', 60, 60);
+            $grid->sku("SKU")->sortable();
+            $grid->shenzhen_inventory("广州库存")->editable()->sortable();
+            $grid->saudi_inventory("沙特库存")->sortable();
+
+            $grid->column("总库存", "总库存")->display(function() {
+               return $this->shenzhen_inventory + $this->saudi_inventory;
+            });
+
+            $grid->filter(function($filter){
+
+                $filter->disableIdFilter();
+                $filter->like('sku', 'SKU');
+            });
 
             $grid->created_at();
             $grid->updated_at();
@@ -96,8 +107,8 @@ class ProductsController extends Controller
             $form->display('id', 'ID');
             $form->text("sku", "SKU");
             $form->text("picture", "图片链接");
-            $form->number("shenzhen_inventory", "深圳库存");
-            $form->display("saudi_inventroy", "沙特库存");
+            $form->number("shenzhen_inventory", "广州库存");
+            $form->display("saudi_inventory", "沙特库存");
 
             $form->display('created_at', 'Created At');
             $form->display('updated_at', 'Updated At');

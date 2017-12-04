@@ -12,7 +12,7 @@ return [
     | any other location as required by the application or its packages.
     */
 
-    'name'                          => env('APP_NAME', 'Laravel'),
+    'name'                           => env('APP_NAME', 'Laravel'),
     /*
     |--------------------------------------------------------------------------
     | Application Environment
@@ -24,15 +24,15 @@ return [
     |
     */
 
-    'env'                           => env('APP_ENV', 'production'),
-    'shopify_app_key'               => env('SHOPIFY_APP_KEY'),
-    'shopify_app_password'          => env('SHOPIFY_APP_PASSWORD'),
-    'shopify_shared_secret'         => env('SHOPIFY_SHARED_SECRET'),
-    'shopify_api_basic_url'         => env('SHOPIFY_API_BASIC_URL'),
-    'fetchr_authorization_shenzhen' => env('FETCHR_AUTHORIZATION_SHENZHEN'),
-    'fetchr_authorization_saudi'    => env('FETCHR_AUTHORIZATION_SAUDI'),
-    'fetchr_api_basic_url'          => env('FETCHR_API_BASIC_URL'),
-    'fetchr_tracking_url'           => env('FETCHR_TRACKING_URL'),
+    'env'                            => env('APP_ENV', 'production'),
+    'shopify_app_key'                => env('SHOPIFY_APP_KEY'),
+    'shopify_app_password'           => env('SHOPIFY_APP_PASSWORD'),
+    'shopify_shared_secret'          => env('SHOPIFY_SHARED_SECRET'),
+    'shopify_api_basic_url'          => env('SHOPIFY_API_BASIC_URL'),
+    'fetchr_authorization_guangzhou' => env('FETCHR_AUTHORIZATION_GUANGZHOU'),
+    'fetchr_authorization_saudi'     => env('FETCHR_AUTHORIZATION_SAUDI'),
+    'fetchr_api_basic_url'           => env('FETCHR_API_BASIC_URL'),
+    'fetchr_tracking_url'            => env('FETCHR_TRACKING_URL'),
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode
@@ -44,7 +44,7 @@ return [
     |
     */
 
-    'debug'                         => env('APP_DEBUG', false),
+    'debug'                          => env('APP_DEBUG', false),
     /*
     |--------------------------------------------------------------------------
     | Application URL
@@ -56,7 +56,7 @@ return [
     |
     */
 
-    'url'                           => env('APP_URL', 'http://localhost'),
+    'url'                            => env('APP_URL', 'http://localhost'),
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
@@ -68,7 +68,7 @@ return [
     |
     */
 
-    'timezone'                      => 'UTC',
+    'timezone'                       => 'UTC',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'locale'                        => 'en',
+    'locale'                         => 'en',
     /*
     |--------------------------------------------------------------------------
     | Application Fallback Locale
@@ -92,7 +92,7 @@ return [
     |
     */
 
-    'fallback_locale'               => 'en',
+    'fallback_locale'                => 'en',
     /*
     |--------------------------------------------------------------------------
     | Encryption Key
@@ -104,8 +104,8 @@ return [
     |
     */
 
-    'key'                           => env('APP_KEY'),
-    'cipher'                        => 'AES-256-CBC',
+    'key'                            => env('APP_KEY'),
+    'cipher'                         => 'AES-256-CBC',
     /*
     |--------------------------------------------------------------------------
     | Logging Configuration
@@ -119,8 +119,8 @@ return [
     |
     */
 
-    'log'                           => env('APP_LOG', 'single'),
-    'log_level'                     => env('APP_LOG_LEVEL', 'debug'),
+    'log'                            => env('APP_LOG', 'single'),
+    'log_level'                      => env('APP_LOG_LEVEL', 'debug'),
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
@@ -132,7 +132,7 @@ return [
     |
     */
 
-    'providers'                     => [
+    'providers'                      => [
 
         /*
          * Laravel Framework Service Providers...
@@ -185,7 +185,7 @@ return [
     |
     */
 
-    'aliases'                       => [
+    'aliases'                        => [
 
         'App'          => Illuminate\Support\Facades\App::class,
         'Artisan'      => Illuminate\Support\Facades\Artisan::class,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use App\Orders;
+use App\Products;
 
 class OrdersController extends Controller
 {
@@ -42,6 +43,42 @@ class OrdersController extends Controller
             } catch (QueryException $e) {
 
                 return $e->getMessage();
+            }
+        }
+        else {
+            return "mismatched";
+        }
+    }
+
+    public function product_create(Request $request)
+    {
+        $data        = $request->getContent();
+        $hmac_header = $request->header("X-Shopify-Hmac-Sha256");
+
+        if ($this->verify_webhook($data, $hmac_header)) {
+            $product_arr = json_decode($data, true);
+            if (isset($product_arr['variants'])) {
+                $variants = $product_arr['variants'];
+                $image    = isset($product_arr['images']['0']['src']) ? $product_arr['images'][0]['src'] : "";
+
+                if (count($variants) > 0) {
+                    foreach ($variants as $item) {
+                        $product          = new Products();
+                        $product->sku     = $item['sku'];
+                        $product->picture = $image;
+                        try {
+
+                            $product->save();
+
+                            return "save successfully";
+
+                        } catch (QueryException $e) {
+
+                            return $e->getMessage();
+                        }
+
+                    }
+                }
             }
         }
         else {
