@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use App\Orders;
 use App\Products;
+use Illuminate\Support\Facades\Log;
 
 class OrdersController extends Controller
 {
@@ -54,6 +55,7 @@ class OrdersController extends Controller
     {
         $data        = $request->getContent();
         $hmac_header = $request->header("X-Shopify-Hmac-Sha256");
+        Log::info("product_create data: " . $data);
 
         if ($this->verify_webhook($data, $hmac_header)) {
             $product_arr = json_decode($data, true);
