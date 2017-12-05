@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Mockery\CountValidator\Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use App\Products;
@@ -22,7 +21,7 @@ class SyncSku extends Command
      *
      * @var string
      */
-    protected $description = 'sync shopify sku';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -41,6 +40,7 @@ class SyncSku extends Command
      */
     public function handle()
     {
+        //
         //
         $client        = new Client();
         $authorization = "Basic " . base64_encode(
@@ -92,7 +92,7 @@ class SyncSku extends Command
             }
 
 
-        } catch (Exception $e) {
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
 
         }
     }
