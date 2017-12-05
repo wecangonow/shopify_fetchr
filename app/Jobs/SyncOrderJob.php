@@ -75,12 +75,12 @@ class SyncOrderJob implements ShouldQueue
 
                     $track_info = $track_arr['tracking_information'];
 
-                    $track_info = [
-                        ['status_code' => 'UPL', 'status_date' => '2017-11-27T10:42:41.764027'],
-                        ['status_code' => 'PKD', 'status_date' => '2017-11-27T10:42:41.764027'],
-                        ['status_code' => 'DLV', 'status_date' => '2017-11-27T10:42:41.764027'],
-                        ['status_code' => 'HLD', 'status_date' => '2017-11-27T10:42:41.764027'],
-                    ];
+                    //$track_info = [
+                    //    ['status_code' => 'UPL', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //    ['status_code' => 'PKD', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //    ['status_code' => 'DLV', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //    ['status_code' => 'HLD', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //];
                     if (count($track_info) > 0) {
                         foreach ($track_info as $info) {
                             $status_code = $info['status_code'];
