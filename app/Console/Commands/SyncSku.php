@@ -47,7 +47,7 @@ class SyncSku extends Command
                 config('app.shoipfy_app_key') . ":" . config('app.shopify_app_password')
             );
 
-        $get_url = config('app.shopify_api_basic_url') . '/products.json?fields=id,images,variants';
+        $get_url = config('app.shopify_api_basic_url') . '/products.json?limit=250&fields=id,images,variants';
 
         try {
             $res = $client->request(
