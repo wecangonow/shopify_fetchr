@@ -22,32 +22,36 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        return Admin::content(function (Content $content) {
+        return Admin::content(
+            function (Content $content) {
 
-            $content->header('SKU列表');
-            $content->description('');
+                $content->header('SKU列表');
+                $content->description('');
 
-            $content->body($this->grid());
-        });
+                $content->body($this->grid());
+            }
+        );
     }
 
     /**
      * Edit interface.
      *
      * @param $id
+     *
      * @return Content
      */
     public function edit($id)
     {
-        return Admin::content(function (Content $content) use ($id) {
+        return Admin::content(
+            function (Content $content) use ($id) {
 
-            $content->header('编辑SKU');
-            $content->description('');
+                $content->header('编辑SKU');
+                $content->description('');
 
-            $content->body($this->form()->edit($id));
-        });
+                $content->body($this->form()->edit($id));
+            }
+        );
     }
-
 
     /**
      * Create interface.
@@ -56,13 +60,15 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        return Admin::content(function (Content $content) {
+        return Admin::content(
+            function (Content $content) {
 
-            $content->header('新增SKU');
-            $content->description('');
+                $content->header('新增SKU');
+                $content->description('');
 
-            $content->body($this->form());
-        });
+                $content->body($this->form());
+            }
+        );
     }
 
     /**
@@ -72,27 +78,37 @@ class ProductsController extends Controller
      */
     protected function grid()
     {
-        return Admin::grid(Products::class, function (Grid $grid) {
+        return Admin::grid(
+            Products::class,
+            function (Grid $grid) {
 
-            $grid->id('ID')->sortable();
-            $grid->picture()->image('', 60, 60);
-            $grid->sku("SKU")->sortable();
-            $grid->shenzhen_inventory("广州库存")->editable()->sortable();
-            $grid->saudi_inventory("沙特库存")->sortable();
+                $grid->id('ID')->sortable();
+                $grid->picture()->image('', 60, 60);
+                $grid->sku("SKU")->sortable();
+                $grid->shenzhen_inventory("广州库存")->editable()->sortable();
+                $grid->saudi_inventory("沙特库存")->sortable();
 
-            $grid->column("总库存", "总库存")->display(function() {
-               return $this->shenzhen_inventory + $this->saudi_inventory;
-            });
+                $grid->column("总库存", "总库存")->display(
+                    function () {
+                        return $this->shenzhen_inventory + $this->saudi_inventory;
+                    }
+                );
 
-            $grid->filter(function($filter){
+                $grid->disableExport();
 
-                $filter->disableIdFilter();
-                $filter->like('sku', 'SKU');
-            });
+                $grid->filter(
+                    function ($filter) {
 
-            $grid->created_at();
-            $grid->updated_at();
-        });
+                        $filter->useModal();
+                        $filter->disableIdFilter();
+                        $filter->like('sku', 'SKU');
+                    }
+                );
+
+                $grid->created_at();
+                $grid->updated_at();
+            }
+        );
     }
 
     /**
@@ -102,17 +118,20 @@ class ProductsController extends Controller
      */
     protected function form()
     {
-        return Admin::form(Products::class, function (Form $form) {
+        return Admin::form(
+            Products::class,
+            function (Form $form) {
 
-            $form->display('id', 'ID');
-            $form->text("sku", "SKU");
-            $form->text("picture", "图片链接");
-            $form->number("shenzhen_inventory", "广州库存");
-            $form->display("saudi_inventory", "沙特库存");
+                $form->display('id', 'ID');
+                $form->text("sku", "SKU");
+                $form->text("picture", "图片链接");
+                $form->number("shenzhen_inventory", "广州库存");
+                $form->display("saudi_inventory", "沙特库存");
 
-            $form->display('created_at', 'Created At');
-            $form->display('updated_at', 'Updated At');
-            $form->disableReset();
-        });
+                $form->display('created_at', 'Created At');
+                $form->display('updated_at', 'Updated At');
+                $form->disableReset();
+            }
+        );
     }
 }

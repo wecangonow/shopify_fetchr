@@ -13,6 +13,7 @@ Route::group([
     $router->get('/', 'HomeController@index');
 
     $router->resource('products', ProductsController::class);
+    $router->resource('orders', OrderController::class);
 
 
 });

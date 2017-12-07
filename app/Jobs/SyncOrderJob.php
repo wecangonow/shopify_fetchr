@@ -45,6 +45,8 @@ class SyncOrderJob implements ShouldQueue
         $location      = $this->task['location'];
         $authorization = $this->task['authorization'];
 
+        Log::info("Fetchr url is " . $url);
+
         try {
             $res = $client->request(
                 "GET",
@@ -152,7 +154,7 @@ class SyncOrderJob implements ShouldQueue
                         );
                     }
 
-                    $message = sprintf("SKU %s in %s reduce %d", $sku, $location, $quantity);
+                    $message = sprintf("Id is %d SKU %s in %s reduce %d", $id, $sku, $location, $quantity);
 
                     Log::info($message);
 
@@ -163,7 +165,7 @@ class SyncOrderJob implements ShouldQueue
                         ['saudi_inventory' => DB::raw('saudi_inventory+' . $quantity)]
                     );
 
-                    $message = sprintf("SKU %s in saudi add %d", $sku, $quantity);
+                    $message = sprintf("ID is %d SKU %s in saudi add %d", $id, $sku, $quantity);
 
                     Log::info($message);
 
@@ -204,7 +206,7 @@ class SyncOrderJob implements ShouldQueue
                 return true;
             }
             else {
-                Log::info("order_id $order_id" . $response);
+                Log::info("order_id $order_id  status code is $status_code" . $response);
 
                 return false;
             }
