@@ -133,7 +133,8 @@ class SyncOrderJob implements ShouldQueue
     // UPL 减库存  HLD加沙特库存
     public function sync_inventory($id, $location, $type)
     {
-        $order_full_info = @Orders::find($id)->get(['order_full_info'])[0]['order_full_info'];
+
+        $order_full_info = @Orders::where("id", $id)->get(['order_full_info'])[0]['order_full_info'];
 
         $line_items = @json_decode($order_full_info, true)['line_items'];
 
