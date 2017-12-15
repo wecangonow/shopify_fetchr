@@ -85,7 +85,7 @@ class ProductsController extends Controller
                 $grid->id('ID')->sortable();
                 $grid->picture()->image('', 60, 60);
                 $grid->sku("SKU")->sortable();
-                $grid->shenzhen_inventory("广州库存")->editable()->sortable();
+                $grid->shenzhen_inventory("广州库存")->sortable();
                 $grid->saudi_inventory("沙特库存")->sortable();
 
                 $grid->column("总库存", "总库存")->display(
@@ -99,11 +99,22 @@ class ProductsController extends Controller
                 $grid->filter(
                     function ($filter) {
 
-                        $filter->useModal();
-                        $filter->disableIdFilter();
+                        //$filter->useModal();
+                        //$filter->disableIdFilter();
                         $filter->like('sku', 'SKU');
                     }
                 );
+
+                $grid->actions(function($actions) {
+
+                    $key = $actions->getKey();
+                    $actions->disableDelete();
+                    $actions->disableEdit();
+                    $actions->prepend('<a href="inventory_history/create?&sku_id='. $key . '">入库</a>');
+                    $actions->prepend('<a href="inventory_history?&sku_id='. $key . '">库存记录&nbsp;&nbsp;</a>');
+
+
+                });
 
                 $grid->created_at();
                 $grid->updated_at();

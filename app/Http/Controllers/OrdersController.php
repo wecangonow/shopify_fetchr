@@ -87,4 +87,13 @@ class OrdersController extends Controller
             return "mismatched";
         }
     }
+
+
+    public function get_sku_name(Request $request)
+    {
+        $q = $request->get("q");
+
+        return Products::where('sku', 'like', "%$q%")->paginate(null, ['id', 'sku as text']);
+
+    }
 }

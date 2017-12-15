@@ -11,6 +11,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 use App\Orders;
 use App\Products;
+use App\InventoryHistory;
 use Illuminate\Support\Facades\DB;
 
 class SyncOrderJob implements ShouldQueue
@@ -93,7 +94,7 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery order created at " . $status_date);
                                 //TODO  更新sku的当地库存
-                                $this->sync_inventory($id, $location, "UPL");
+                                $this->sync_inventory($id, $location, "UPL", $track_no);
                             }
                             if ($status_code == "PKD" && $this->task['picked_status'] == 0) {
                                 $update_order = Orders::find($id);
@@ -115,7 +116,7 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery on hold at " . $status_date);
                                 //TODO  更新sku的当地库存
-                                $this->sync_inventory($id, $location, "HLD");
+                                $this->sync_inventory($id, $location, "HLD", $track_no);
                             }
                         }
                     }
@@ -131,7 +132,7 @@ class SyncOrderJob implements ShouldQueue
     }
 
     // UPL 减库存  HLD加沙特库存
-    public function sync_inventory($id, $location, $type)
+    public function sync_inventory($id, $location, $type, $track_no)
     {
 
         $order_full_info = @Orders::where("id", $id)->get(['order_full_info'])[0]['order_full_info'];
@@ -148,11 +149,15 @@ class SyncOrderJob implements ShouldQueue
                         Products::where('sku', $sku)->update(
                             ['shenzhen_inventory' => DB::raw('shenzhen_inventory-' . $quantity)]
                         );
+
+                        $this->add_inventory_history($sku, "guangzhou", $quantity, 0, $track_no, "fetchr");
+
                     }
                     else {
                         Products::where('sku', $sku)->update(
                             ['saudi_inventory' => DB::raw('saudi_inventory-' . $quantity)]
                         );
+                        $this->add_inventory_history($sku, "saudi", $quantity, 0, $track_no, "fetchr");
                     }
 
                     $message = sprintf("Id is %d SKU %s in %s reduce %d", $id, $sku, $location, $quantity);
@@ -165,6 +170,8 @@ class SyncOrderJob implements ShouldQueue
                     Products::where('sku', $sku)->update(
                         ['saudi_inventory' => DB::raw('saudi_inventory+' . $quantity)]
                     );
+
+                    $this->add_inventory_history($sku, "saudi", $quantity, 1, $track_no, "fetchr");
 
                     $message = sprintf("ID is %d SKU %s in saudi add %d", $id, $sku, $quantity);
 
@@ -218,6 +225,29 @@ class SyncOrderJob implements ShouldQueue
 
             return false;
         }
+
+    }
+
+    public function add_inventory_history($sku, $warehouse, $quantity, $type, $track_no, $delivery_company)
+    {
+        $model = new InventoryHistory();
+
+        $sku_id = Products::where("sku", $sku)->get(['id'])->first()['id'];
+
+        $model->username        = "automatic";
+        $model->deliver_company = $delivery_company;
+        $model->deliver_number  = $track_no;
+        $model->quantity        = $quantity;
+        $model->type            = $type;
+        $model->sku_id          = $sku_id;
+        $model->warehouse       = $warehouse;
+
+        $model->save();
+
+        $op      = $type ? "add" : "reduce";
+        $message = sprintf("SKU is %s in warehouse %s %s %d", $sku, $warehouse, $op, $quantity);
+
+        Log::info($message);
 
     }
 }
