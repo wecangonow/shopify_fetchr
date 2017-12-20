@@ -175,7 +175,7 @@ class InventoryHistoryController extends Controller
                 );
 
                 $form->text("deliver_number", "快递单号")->rules('required');
-                $form->text("quantity", "入库数量")->rules('required|numeric|min:1');
+                $form->text("quantity", "入库数量")->rules('required|numeric');
                 $form->display('created_at', 'Created At');
                 $form->display('updated_at', 'Updated At');
 
