@@ -116,8 +116,8 @@ class ProductsController extends Controller
 
                 });
 
-                $grid->created_at();
-                $grid->updated_at();
+                $grid->created_at("");
+                $grid->updated_at("更新时间")->sortable("desc");
             }
         );
     }

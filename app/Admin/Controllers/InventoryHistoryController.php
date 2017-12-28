@@ -103,13 +103,13 @@ class InventoryHistoryController extends Controller
                         return $type ? "入库" : "出库";
 
                     }
-                );
+                )->sortable("desc");
                 $grid->quantity("入库数量");
                 $grid->deliver_company("物流公司");
                 $grid->deliver_number("快递单号");
 
                 $grid->username("操作员");
-                $grid->created_at("创建时间");
+                $grid->created_at("创建时间")->sortable("desc");
                 $grid->updated_at("更新时间");
 
                 $grid->disableCreation();
@@ -123,6 +123,7 @@ class InventoryHistoryController extends Controller
                         //$filter->useModal();
                         //$filter->disableIdFilter();
                         $filter->equal('sku_id', 'SKU')->select("/api/sku");
+                        $filter->equal('type', '类型')->select(['0' => '出库', '1' => '入库']);
                     }
                 );
 
