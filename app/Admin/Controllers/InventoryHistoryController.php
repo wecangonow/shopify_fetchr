@@ -85,6 +85,8 @@ class InventoryHistoryController extends Controller
             InventoryHistory::class,
             function (Grid $grid) {
 
+                $grid->model()->orderBy("created_at", "desc");
+
                 $grid->id('ID')->sortable();
 
                 $grid->column("sku_id", "SKU")->display(
@@ -103,13 +105,13 @@ class InventoryHistoryController extends Controller
                         return $type ? "入库" : "出库";
 
                     }
-                )->sortable("desc");
+                )->sortable();
                 $grid->quantity("入库数量");
                 $grid->deliver_company("物流公司");
                 $grid->deliver_number("快递单号");
 
                 $grid->username("操作员");
-                $grid->created_at("创建时间")->sortable("desc");
+                $grid->created_at("创建时间")->sortable();
                 $grid->updated_at("更新时间");
 
                 $grid->disableCreation();

@@ -82,6 +82,8 @@ class ProductsController extends Controller
             Products::class,
             function (Grid $grid) {
 
+                $grid->model()->orderBy("updated_at", "desc");
+
                 $grid->id('ID')->sortable();
                 $grid->picture()->image('', 60, 60);
                 $grid->sku("SKU")->sortable();
