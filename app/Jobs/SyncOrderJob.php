@@ -65,24 +65,23 @@ class SyncOrderJob implements ShouldQueue
                     $track_no = $track_arr['order_information']['tracking_no'];
 
                     if ($track_no != "" && $this->task['fulfillment_status'] == 0) {
-                        if ($this->fulfillment_request($track_no, $order_id)) {
-                            //更新fulfillment status
-                            $update_order                     = Orders::find($this->task['id']);
-                            $update_order->fulfillment_status = 1;
-                            $update_order->tracking_no        = $track_no;
-                            if ($update_order->save()) {
-                                Log::info("order_id $order_id fulfillment successfully");
-                            }
+                        $this->fulfillment_request($track_no, $order_id);
+                        //更新fulfillment status
+                        $update_order                     = Orders::find($this->task['id']);
+                        $update_order->fulfillment_status = 1;
+                        $update_order->tracking_no        = $track_no;
+                        if ($update_order->save()) {
+                            Log::info("order_id $order_id fulfillment successfully");
                         }
                     }
 
                     $track_info = $track_arr['tracking_information'];
 
                     //$track_info = [
-                    //    ['status_code' => 'UPL', 'status_date' => '2017-11-27T10:42:41.764027'],
-                    //    ['status_code' => 'PKD', 'status_date' => '2017-11-27T10:42:41.764027'],
-                    //    ['status_code' => 'DLV', 'status_date' => '2017-11-27T10:42:41.764027'],
-                    //    ['status_code' => 'HLD', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //['status_code' => 'UPL', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //['status_code' => 'PKD', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //['status_code' => 'DLV', 'status_date' => '2017-11-27T10:42:41.764027'],
+                    //['status_code' => 'HLD', 'status_date' => '2017-11-27T10:42:41.764027'],
                     //];
                     if (count($track_info) > 0) {
                         foreach ($track_info as $info) {
@@ -108,6 +107,7 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->delivery_status = 1;
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery finished at " . $status_date);
+                                $this->auto_mark_paid($order_id);
                             }
 
                             if ($status_code == "HLD") {
@@ -127,6 +127,50 @@ class SyncOrderJob implements ShouldQueue
         } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             Log::info("url $url response " . $e->getResponse()->getBody()->getContents() . " Location: " . $location);
+        }
+
+    }
+
+    public function auto_mark_paid($order_id)
+    {
+        $client        = new Client();
+        $authorization = "Basic " . base64_encode(
+                config('app.shoipfy_app_key') . ":" . config('app.shopify_app_password')
+            );
+        $post_arr      = [
+            'transaction' => [
+                'kind' => 'capture',
+            ],
+        ];
+
+        $post_url = config('app.shopify_api_basic_url') . '/orders/' . $order_id . '/transactions.json';
+
+        try {
+            $res = $client->request(
+                "POST",
+                $post_url,
+                ['headers' => ['Authorization' => $authorization], 'json' => $post_arr]
+            );
+
+            $response    = $res->getBody()->getContents();
+            $status_code = $res->getStatusCode();
+
+            if ($status_code == "201") {
+                Log::info("order_id $order_id mark as paid successfully!");
+
+                return true;
+            }
+            else {
+                Log::info("order_id $order_id  status code is $status_code" . $response);
+
+                return false;
+            }
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            Log::info("order_id $order_id " . $e->getResponse()->getBody()->getContents());
+
+            return false;
         }
 
     }
