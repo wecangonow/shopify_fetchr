@@ -80,7 +80,7 @@ class OrderController extends Controller
             $grid->delivery_status();
             $grid->delivery_order_created_at();
             $grid->tracking_no();
-            $grid->picked_staus();
+            $grid->picked_status();
             $grid->hold_status();
             $grid->order_full_info();
 
