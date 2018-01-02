@@ -76,11 +76,11 @@ class OrderController extends Controller
             $grid->id('ID')->sortable();
             $grid->name();
             $grid->order_id();
-            $grid->fufillment_status();
+            $grid->fulfillment_status();
             $grid->delivery_status();
             $grid->delivery_order_created_at();
             $grid->tracking_no();
-            $grid->picked_satus();
+            $grid->picked_staus();
             $grid->hold_status();
             $grid->order_full_info();
 
