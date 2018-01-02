@@ -110,7 +110,7 @@ class SyncOrderJob implements ShouldQueue
                                 $this->auto_mark_paid($order_id);
                             }
 
-                            if ($status_code == "HLD") {
+                            if ($status_code == "HLD" || $status_code == "RTW") {
                                 $update_order              = Orders::find($id);
                                 $update_order->hold_status = 1;
                                 $update_order->save();
