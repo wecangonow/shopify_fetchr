@@ -4,6 +4,7 @@ namespace App\Admin\Controllers;
 
 use App\Products;
 
+use App\Purchases;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Facades\Admin;
@@ -95,7 +96,16 @@ class ProductsController extends Controller
                         return $this->shenzhen_inventory + $this->saudi_inventory;
                     }
                 );
-
+    
+                $grid->column("在途数量", "在途数量")->display(
+                    function () {
+                        
+                        $sum = Purchases::where('sku', $this->id)->where("is_delivered", 0)->sum("count");
+    
+                        return $sum;
+                    }
+                );
+                
                 $grid->disableExport();
 
                 $grid->filter(
@@ -114,7 +124,9 @@ class ProductsController extends Controller
                     $actions->disableEdit();
                     $actions->prepend('<a href="inventory_history/create?&sku_id='. $key . '">入库</a>');
                     $actions->prepend('<a href="inventory_history?&sku_id='. $key . '">库存记录&nbsp;&nbsp;</a>');
-
+    
+                    $actions->prepend('<a href="purchases/create?&sku_id='. $key . '">录入采购&nbsp;&nbsp;</a>');
+                    $actions->prepend('<a href="purchases?&sku='. $key . '">采购记录&nbsp;&nbsp;</a>');
 
                 });
 
@@ -136,8 +148,8 @@ class ProductsController extends Controller
             function (Form $form) {
 
                 $form->display('id', 'ID');
-                $form->text("sku", "SKU");
-                $form->text("picture", "图片链接");
+                $form->text("sku", "SKU")->rules("required");
+                $form->image('picture');
                 $form->number("shenzhen_inventory", "广州库存");
                 $form->display("saudi_inventory", "沙特库存");
 

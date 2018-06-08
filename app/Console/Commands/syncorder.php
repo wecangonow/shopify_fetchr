@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\SyncYokesiOrderJob;
 use Illuminate\Console\Command;
 use App\Orders;
 use Log;
@@ -15,14 +16,14 @@ class SyncOrder extends Command
      * @var string
      */
     protected $signature = 'sync:orders';
-
+    
     /**
      * The console command description.
      *
      * @var string
      */
     protected $description = 'sync shopify order delivery status';
-
+    
     /**
      * Create a new command instance.
      *
@@ -32,7 +33,7 @@ class SyncOrder extends Command
     {
         parent::__construct();
     }
-
+    
     /**
      * Execute the console command.
      *
@@ -40,39 +41,58 @@ class SyncOrder extends Command
      */
     public function handle()
     {
-
-        $orders = Orders::where("hold_status", 0)->where('delivery_status', 0)->get(
-            [
-                'id',
-                'name',
-                'picked_status',
-                'order_id',
-                'fulfillment_status',
-                'delivery_order_created_at',
-            ]
-        );
-
-
+        
+        $orders = Orders::where('delivery_status', 0)->orWhere('delivery_status', 2)
+                        ->get(
+                            [
+                                'id',
+                                'sku',
+                                'order_id',
+                                'tracking_no',
+                                'company_name',
+                                'num',
+                                'inventory_plus_flag',
+                                'inventory_reduce_flag',
+                            ]
+                        );
+        
         foreach ($orders as $order) {
-            $name     = $order->name;
-            $url      = config('app.fetchr_api_basic_url') . "/" . $name . "?reference_type=client_ref";
-
-            $job['id'] = $order->id;
-            $job['name'] = $order->name;
-            $job['picked_status'] = $order->picked_status;
-            $job['order_id'] = $order->order_id;
-            $job['fulfillment_status'] = $order->fulfillment_status;
-            $job['delivery_order_created_at'] = $order->delivery_order_created_at;
-            $job['url'] = $url;
-            $job['location'] = "guangzhou";
-            $job['authorization'] = config('app.fetchr_authorization_guangzhou');
-
-            dispatch(new SyncOrderJob($job));
-            $job['location'] = 'saudi';
-            $job['authorization'] = config('app.fetchr_authorization_saudi');
-            dispatch(new SyncOrderJob($job));
+            $name = $order->order_id;
+            $url  = config('app.fetchr_api_basic_url') . "/" . $name . "?reference_type=client_ref";
+            
+            $job['id']                    = $order->id;
+            $job['sku']                   = $order->sku;
+            $job['num']                   = $order->num;
+            $job['tracking_no']           = $order->tracking_no;
+            $job['order_id']              = $order->order_id;
+            $job['url']                   = $url;
+            $job['inventory_plus_flag']   = $order->inventory_plus_flag;
+            $job['inventory_reduce_flag'] = $order->inventory_reduce_flag;
+            
+            if ($order->company_name == "yokesi") {
+                
+                dispatch(new SyncYokesiOrderJob($job));
+                
+            } else {
+                if ($order->company_name == "fetchr_sau") {
+                    $job['location']      = "guangzhou";
+                    $job['authorization'] = config('app.fetchr_authorization_guangzhou');
+                }
+                elseif ($order->company_name == "fetchr_sau_local") {
+                    $job['location']      = 'saudi';
+                    $job['authorization'] = config('app.fetchr_authorization_saudi');
+        
+                }
+                else {
+                    $job['location']      = 'saudi';
+                    $job['authorization'] = config('app.fetchr_authorization_are');
+                }
+    
+                dispatch(new SyncOrderJob($job));
+                
+            }
         }
-
+        
     }
-
+    
 }

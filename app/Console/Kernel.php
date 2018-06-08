@@ -16,6 +16,7 @@ class Kernel extends ConsoleKernel
         //
         Commands\SyncOrder::class,
         Commands\SyncSku::class,
+        Commands\syncsku_delivery_info::class,
     ];
 
     /**

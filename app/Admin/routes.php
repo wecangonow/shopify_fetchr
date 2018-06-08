@@ -14,7 +14,9 @@ Route::group([
 
     $router->resource('products', ProductsController::class);
     $router->resource('orders', OrderController::class);
+    $router->resource('excel_history', ExcelHistoryController::class);
     $router->resource('inventory_history', InventoryHistoryController::class);
+    $router->resource('purchases', PurchasesController::class);
 
 
 });

@@ -4,12 +4,14 @@ namespace App\Admin\Controllers;
 
 use App\InventoryHistory;
 
+use App\Purchases;
 use Encore\Admin\Form;
 use Encore\Admin\Grid;
 use Encore\Admin\Facades\Admin;
 use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Products;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +25,7 @@ class InventoryHistoryController extends Controller
      *
      * @return Content
      */
-    public function index()
+    public function index(Request $request)
     {
         return Admin::content(
             function (Content $content) {
@@ -106,7 +108,7 @@ class InventoryHistoryController extends Controller
 
                     }
                 )->sortable();
-                $grid->quantity("入库数量");
+                $grid->quantity("数量");
                 $grid->deliver_company("物流公司");
                 $grid->deliver_number("快递单号");
 
@@ -211,6 +213,10 @@ class InventoryHistoryController extends Controller
                                 "SKU: " . $sku_name . " inventory added $form->quantity by $form->username failed"
                             );
                         }
+                        
+                        $delivery_number = $form->deliver_number;
+                        
+                        Purchases::where("delivery_no", $delivery_number)->update(['is_delivered' => 1, 'updated_at' => date("Y-m-d H:i:s", time())]);
 
                         return redirect("admin/products");
                     }
