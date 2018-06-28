@@ -64,17 +64,17 @@ class OrderController extends Controller
                     $order_model = new Orders();
                     $total_info = $order_model->totalDeliveryStat();
                     
-                    $total_orders = $total_info[0] + $total_info[1] + $total_info[2] + $total_info[3];
+                    $total_orders = @($total_info[0] + $total_info[1] + $total_info[2] + $total_info[3]);
                     
-                    $total_rate = $total_info[1] / $total_orders * 100 . "%";
+                    $total_rate = @($total_info[1] / $total_orders * 100 . "%");
                     
                     $box1 = new Box('Total Orders', $total_orders);
                     $box1->style("info");
-                    $box2 = new Box('签收', $total_info[1]);
+                    $box2 = new Box('签收', @$total_info[1]);
                     $box2->style("info");
-                    $box3 = new Box('拒签', $total_info[3]);
+                    $box3 = new Box('拒签', @$total_info[3]);
                     $box3->style("info");
-                    $box4 = new Box('其他(配送中 or 滞留)', $total_info[0] + $total_info[2]);
+                    $box4 = new Box('其他(配送中 or 滞留)', @$total_info[0] + @$total_info[2]);
                     $box4->style("info");
                     
                     $box5 = new Box('总签收率', $total_rate);
@@ -87,19 +87,19 @@ class OrderController extends Controller
                 });
                 $content->body($this->grid());
                 
-                $content->row(
-                    function (Row $row) use ($data) {
-                        
-                        $row->column(
-                            12,
-                            function (Column $column) use ($data) {
-                                
-                                $column->append((new Box('签收率', new Line($data)))->style('danger'));
-                            }
-                        );
-                        
-                    }
-                );
+                //$content->row(
+                //    function (Row $row) use ($data) {
+                //
+                //        $row->column(
+                //            12,
+                //            function (Column $column) use ($data) {
+                //
+                //                $column->append((new Box('签收率', new Line($data)))->style('danger'));
+                //            }
+                //        );
+                //
+                //    }
+                //);
             }
         );
     }
