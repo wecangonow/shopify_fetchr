@@ -164,7 +164,7 @@ class InventoryHistoryController extends Controller
                 $form->select("warehouse", "仓库")->options(
                     [
                         "guangzhou" => 'guangzhou',
-                        "saudi"     => 'saudi',
+                        //"saudi"     => 'saudi',
                     ]
                 );
 

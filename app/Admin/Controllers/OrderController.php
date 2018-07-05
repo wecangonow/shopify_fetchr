@@ -154,10 +154,10 @@ class OrderController extends Controller
             function (Grid $grid) {
                 
                 $grid->id('ID')->sortable();
-                $grid->domains("订单域名");
+                //$grid->domains("订单域名");
                 $grid->sku();
                 $grid->num("数量");
-                $grid->order_id("订单号");
+                $grid->client_ref("CLIENT_REF");
                 $grid->delivery_status("订单物流状态")->display(
                     function ($delivery_status) {
                         if ($delivery_status == 0) {
@@ -178,7 +178,7 @@ class OrderController extends Controller
                     }
                 );
                 $grid->tracking_no("快递号");
-                $grid->company_name("快递公司");
+                //$grid->company_name("快递公司");
                 $grid->last_step("最新物流信息");
                 $grid->last_step_time("物流信息当地时间");
                 
@@ -187,12 +187,7 @@ class OrderController extends Controller
                         
                         $filter->disableIdFilter();
                         
-                        $filter->equal('sku', 'SKU')->select(
-                            [
-                                "telescope300" => "telescope300",
-                                "telescope200" => "telescope200",
-                            ]
-                        );
+                        $filter->like('sku', 'SKU');
                         $filter->between('created_at', "发货时间")->datetime();
                         
                     }

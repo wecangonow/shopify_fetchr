@@ -93,8 +93,8 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->inventory_reduce_flag = 1;
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery order created at " . $status_date);
-                                //TODO  更新sku的当地库存
-                                $this->sync_inventory($id, $sku, $location, "UPL", $track_no, $num);
+                                ////TODO  更新sku的当地库存
+                                //$this->sync_inventory($id, $sku, $location, "UPL", $track_no, $num);
                             }
                             
                             if ($status_code == "DLV") {
@@ -118,8 +118,8 @@ class SyncOrderJob implements ShouldQueue
                                 $update_order->inventory_plus_flag = 1;
                                 $update_order->save();
                                 Log::info("order_id $order_id delivery  returned at " . $status_date);
-                                //TODO  更新sku的当地库存
-                                $this->sync_inventory($id, $sku, $location, "RETD", $track_no, $num);
+                                ////TODO  更新sku的当地库存
+                                //$this->sync_inventory($id, $sku, $location, "RETD", $track_no, $num);
                             }
                         }
                     }

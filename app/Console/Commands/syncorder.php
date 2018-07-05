@@ -47,7 +47,7 @@ class SyncOrder extends Command
                             [
                                 'id',
                                 'sku',
-                                'order_id',
+                                'client_ref',
                                 'tracking_no',
                                 'company_name',
                                 'num',
@@ -57,40 +57,23 @@ class SyncOrder extends Command
                         );
         
         foreach ($orders as $order) {
-            $name = $order->order_id;
+            $name = $order->client_ref;
             $url  = config('app.fetchr_api_basic_url') . "/" . $name . "?reference_type=client_ref";
             
             $job['id']                    = $order->id;
             $job['sku']                   = $order->sku;
             $job['num']                   = $order->num;
             $job['tracking_no']           = $order->tracking_no;
-            $job['order_id']              = $order->order_id;
+            $job['order_id']              = $order->client_ref;
             $job['url']                   = $url;
             $job['inventory_plus_flag']   = $order->inventory_plus_flag;
             $job['inventory_reduce_flag'] = $order->inventory_reduce_flag;
             
-            if ($order->company_name == "yokesi") {
-                
-                dispatch(new SyncYokesiOrderJob($job));
-                
-            } else {
-                if ($order->company_name == "fetchr_sau") {
-                    $job['location']      = "guangzhou";
-                    $job['authorization'] = config('app.fetchr_authorization_guangzhou');
-                }
-                elseif ($order->company_name == "fetchr_sau_local") {
-                    $job['location']      = 'saudi';
-                    $job['authorization'] = config('app.fetchr_authorization_saudi');
-        
-                }
-                else {
-                    $job['location']      = 'saudi';
-                    $job['authorization'] = config('app.fetchr_authorization_are');
-                }
-    
-                dispatch(new SyncOrderJob($job));
-                
-            }
+            $job['location']      = "guangzhou";
+            $job['authorization'] = config('app.fetchr_authorization_guangzhou');
+            
+            dispatch(new SyncOrderJob($job));
+            
         }
         
     }

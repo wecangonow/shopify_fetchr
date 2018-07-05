@@ -89,13 +89,13 @@ class ProductsController extends Controller
                 $grid->picture()->image('', 60, 60);
                 $grid->sku("SKU")->sortable();
                 $grid->shenzhen_inventory("广州库存")->sortable();
-                $grid->saudi_inventory("沙特库存")->sortable();
+                //$grid->saudi_inventory("沙特库存")->sortable();
 
-                $grid->column("总库存", "总库存")->display(
-                    function () {
-                        return $this->shenzhen_inventory + $this->saudi_inventory;
-                    }
-                );
+                //$grid->column("总库存", "总库存")->display(
+                //    function () {
+                //        return $this->shenzhen_inventory + $this->saudi_inventory;
+                //    }
+                //);
     
                 $grid->column("在途数量", "在途数量")->display(
                     function () {
@@ -151,7 +151,7 @@ class ProductsController extends Controller
                 $form->text("sku", "SKU")->rules("required");
                 $form->image('picture');
                 $form->number("shenzhen_inventory", "广州库存");
-                $form->display("saudi_inventory", "沙特库存");
+                //$form->display("saudi_inventory", "沙特库存");
 
                 $form->display('created_at', 'Created At');
                 $form->display('updated_at', 'Updated At');

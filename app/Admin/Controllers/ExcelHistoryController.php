@@ -13,6 +13,9 @@ use Encore\Admin\Layout\Content;
 use App\Http\Controllers\Controller;
 use Encore\Admin\Controllers\ModelForm;
 use Illuminate\Support\Facades\Log;
+use App\InventoryHistory;
+use App\Products;
+use Illuminate\Support\Facades\DB;
 
 class ExcelHistoryController extends Controller
 {
@@ -87,7 +90,6 @@ class ExcelHistoryController extends Controller
                 
                 $grid->id('ID')->sortable();
                 $grid->publisher('上传人');
-                $grid->domain_name('域名');
                 $grid->file_path('文件路径');
                 $grid->created_at();
                 $grid->updated_at();
@@ -114,7 +116,6 @@ class ExcelHistoryController extends Controller
                 
                 $domains = config('app.domains');
                 
-                $form->select("domain_name", "选择站点域名")->options($domains);
                 $form->hidden('publisher', "操作人")->default(Admin::user()->name);
                 $form->file('file_path', '选择文件');
                 
@@ -126,42 +127,79 @@ class ExcelHistoryController extends Controller
                         
                         $excel_path = public_path() . "/uploads/" . $form->model()->file_path;
                         
-                        
-                        Excel::load($excel_path,function($reader) use ($form){
-                            // Loop through all sheets
-                            $reader->each(function($sheet) use ($form) {
-        
-                                // Loop through all rows
-                                $sheet->each(function($row) use ($form) {
-                                    
-                                    $model = new Orders();
-                                    $info = $row->toArray();
-                                    $order_id = $info['order_id'];
-                                    $delivery_no = $info['delivery_no'];
-                                    $sku = $info['sku'];
-                                    $delivery_company = $info['delivery_company'];
-                                    $num = $info['num'];
-                                    
-                                    $model->sku = $sku;
-                                    $model->order_id = $order_id;
-                                    $model->company_name = $delivery_company;
-                                    $model->tracking_no = $delivery_no;
-                                    $model->num = $num;
-                                    $model->domains = $form->model()->domain_name;
-                                    
-                                    $model->save();
-                                    
-                                    Log::info("Info: " . $order_id . " -" . $delivery_company . "-" . $delivery_no . "\n");
-            
-                                });
+                        Excel::load(
+                            $excel_path,
+                            function ($reader) use ($form) {
+                                // Loop through all sheets
                                 
-        
-                            });
-                            
-                            die;
-    
-                        });
-    
+                                $reader = $reader->getSheet(0);
+                                
+                                $data = $reader->toArray();
+                                unset($data[0]);
+                                
+                                if (count($data) > 0) {
+                                    foreach ($data as $v) {
+                                        if ($v[0]) {
+                                            
+                                            $model            = new Orders();
+                                            $client_ref       = $v[0];
+                                            $tracking_no      = $v[1];
+                                            $sku              = $v[2];
+                                            $delivery_company = "fetchr";
+                                            $num              = $v[3];
+                                            
+                                            
+                                            $model->sku          = $sku;
+                                            $model->client_ref   = $client_ref;
+                                            $model->company_name = $delivery_company;
+                                            $model->tracking_no  = $tracking_no;
+                                            $model->num          = $num;
+                                            
+                                            $model->save();
+                                            
+                                            Log::info(
+                                                "Info: "
+                                                . $client_ref
+                                                . " -"
+                                                . $delivery_company
+                                                . "-"
+                                                . $tracking_no
+                                                . "\n"
+                                            );
+                                            
+                                            $model = new InventoryHistory();
+                                            
+                                            $sku_id = Products::where("sku", $sku)->get(['id'])->first()['id'];
+                                            
+                                            if ($sku_id) {
+                                                $model->username        = Admin::user()->name;
+                                                $model->deliver_company = "fetchr";
+                                                $model->deliver_number  = $tracking_no;
+                                                $model->quantity        = $num;
+                                                $model->type            = 0;   //  0 出库  1  入库
+                                                $model->sku_id          = $sku_id;
+                                                $model->warehouse       = "广州";
+                                                
+                                                if ($model->save()) {
+                                                    Products::where('sku', $sku)->update(
+                                                        ['shenzhen_inventory' => DB::raw('shenzhen_inventory-' . $num)]
+                                                    );
+                                                    
+                                                    $message = sprintf("SKU is %s 广州 warehouse reduce %d", $sku, $num);
+                                                    
+                                                    Log::info($message);
+                                                    
+                                                }
+                                                
+                                            }
+                                            
+                                        }
+                                    }
+                                    
+                                }
+                                
+                            }
+                        );
                         
                     }
                 );
